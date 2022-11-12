@@ -1,0 +1,3 @@
+displayName = Oracle Class
+author = stormytuna & Typhlosionater
+version = 0.1
