@@ -46,6 +46,7 @@ namespace OracleClass {
     /// <item><term>OracleType</term><description> The type of oracle weapon, either Focus, Cane or Glyph</description></item>
     /// <item><term>BaseSoulCapacity</term><description> The base soul capacity of this weapon</description></item>
     /// <item><term>SoulRecoveryFrames</term><description> The amount of frames it takes to go from 0 soul capacity to max soul capacity, not including cooldown frames from exhausting</description></item>
+    /// <item><term>HandleSoulConsumption</term><description> Whether or not this item will handle soul consumption for us. Set this to false for held projectile weapons</description></item>
     /// </list>
     /// This class overrides these ModItem methods, so be sure to either call base or understand what each override does when overriding in your weapon
     /// <list type="bullet">
@@ -87,6 +88,9 @@ namespace OracleClass {
         /// <summary>The number of frames it takes for this weapons soul to recover completely</summary>
         public int SoulRecoveryFrames { get; set; }
 
+        /// <summary>Whether or not this item should handle its own soul consumption. Set this to false for held projectile weapons</summary>
+        public bool HandleSoulConsumption { get; set; }
+
         /// <summary>Whether or not this weapon is exhausted. An exhausted weapon usually cannot be used</summary>
         public bool Exhausted { get; set; } = false;
 
@@ -98,10 +102,13 @@ namespace OracleClass {
 
         // This just consumes soul as we use our weapon
         public override bool? UseItem(Player player) {
-            CurSoulCapacity--;
-            SoulRecoveryCooldown = 5 * 60;
-            if (CurSoulCapacity <= 0) {
-                Exhausted = true;
+            if (HandleSoulConsumption) {
+                Main.NewText("Consumed soul through item");
+                CurSoulCapacity--;
+                SoulRecoveryCooldown = 5 * 60;
+                if (CurSoulCapacity <= 0) {
+                    Exhausted = true;
+                }
             }
 
             return base.UseItem(player);
@@ -164,12 +171,14 @@ namespace OracleClass {
             base.ModifyTooltips(tooltips);
         }
 
-        // This ensures clones of this item have the same soul capacity multiplier from prefix
         // Not 100% sure /when/ this applies but example instanced item does this
         // https://github.com/tModLoader/tModLoader/blob/daa239205ab69743d44f7bb64c9cd3e080024a51/ExampleMod/Content/Items/ExampleInstancedItem.cs
         public override ModItem Clone(Item newEntity) {
             OracleWeapon clone = (OracleWeapon)base.Clone(newEntity);
+            clone.CurSoulCapacity = CurSoulCapacity;
             clone.SoulCapacityMultiplierFromPrefix = SoulCapacityMultiplierFromPrefix;
+            clone.Exhausted = Exhausted;
+            clone.SoulRecoveryCooldown = SoulRecoveryCooldown;
             return clone;
         }
 
@@ -195,6 +204,7 @@ namespace OracleClass {
     /// <list type="bullet">
     /// <item><term>HoldOutOffset</term><description> How far away the projectile will display from your character</description></item>
     /// <item><term>OracleType</term><description> The type of oracle weapon, either Focus, Cane or Glyph</description></item>
+    /// <item><term>RotationOffset</term><description> How many extra radians this projectile will rotate when it's pointed to the mouse</description></item>
     /// <item><term>UseTimeOverride</term><description> Setting this will make the projectile treat that new value as the base useTime of the weapon</description></item>
     /// </list>
     /// This class overrides these ModProjectile methods, so be sure to either call base or understand what each override does when overriding in your weapon
@@ -218,6 +228,9 @@ namespace OracleClass {
 
         /// <summary>The type of this oracle weapon</summary>
         public OracleWeaponType OracleType { get; set; }
+
+        /// <summary>How much this projetile should be rotated when it points to the mouse</summary>
+        public float RotationOffset { get; set; }
 
         /// <summary>This property acts as a frame counter, you can use it to apply spin-up effects</summary>
         public int AI_FrameCount { get; set; } = 0;
@@ -258,17 +271,24 @@ namespace OracleClass {
             Vector2 toMouse = Main.MouseWorld - Projectile.Center;
             toMouse.Normalize();
 
-            // Take soul from our players held item 
+            // Take soul from our players held item
             _soulConsumeCooldown--;
             if (_soulConsumeCooldown <= 0) {
+                // Do our stuff if we've consumed soul from the weapon
+                var heldOracleWeapon = Owner.HeldItem.GetOracleWeapon();
+                heldOracleWeapon.CurSoulCapacity--;
+                heldOracleWeapon.SoulRecoveryCooldown = 5 * 60;
                 _soulConsumeCooldown = UseTimeAfterBuffs;
-                Owner.HeldItem.GetOracleWeapon().CurSoulCapacity--;
                 _totalSoulConsumed++;
+                if (heldOracleWeapon.CurSoulCapacity <= 0) {
+                    heldOracleWeapon.CurSoulCapacity = 0;
+                    heldOracleWeapon.Exhausted = true;
+                }
                 OnUseItem();
             }
 
-            // Kill the projectile if we stop using it
-            if (!Owner.channel) {
+            // Kill the projectile if we stop using it or can't use it
+            if (!Owner.channel || Owner.HeldItem.GetOracleWeapon().CurSoulCapacity <= 0) {
                 Projectile.Kill();
             }
 
@@ -276,7 +296,7 @@ namespace OracleClass {
             Projectile.direction = 1;
             if (Math.Sign(Main.MouseWorld.X - Owner.Center.X) == -1)
                 Projectile.direction = -1;
-            float rotationOffset = Projectile.direction == -1 ? MathHelper.Pi : 0f;
+            float rotationOffset = Projectile.direction * RotationOffset;
             Projectile.rotation = toMouse.ToRotation() + rotationOffset;
             Projectile.spriteDirection = Projectile.direction;
 
