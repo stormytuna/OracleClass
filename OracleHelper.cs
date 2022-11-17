@@ -103,8 +103,8 @@ namespace OracleClass {
         // This just consumes soul as we use our weapon
         public override bool? UseItem(Player player) {
             if (HandleSoulConsumption) {
-                Main.NewText("Consumed soul through item");
                 CurSoulCapacity--;
+                player.GetModPlayer<OraclePlayer>().ReduceSoulOnAllWeapons(Item);
                 SoulRecoveryCooldown = 5 * 60;
                 if (CurSoulCapacity <= 0) {
                     Exhausted = true;
@@ -254,7 +254,7 @@ namespace OracleClass {
 
         /// <summary>Called when the projectile is killed</summary>
         /// <param name="totalCharge">The total amount of soul this item consumed while charging</param>
-        public virtual void OnFinishedCharging(int totalCharge) { }
+        public virtual void OnFinishedCharging(int totalSoulConsumed) { }
 
         // This is a helper property that just applies our attack speed
         private int UseTimeAfterBuffs => (int)((float)UseTimeOverride / Owner.GetWeaponAttackSpeed(Owner.HeldItem));
@@ -277,6 +277,7 @@ namespace OracleClass {
                 // Do our stuff if we've consumed soul from the weapon
                 var heldOracleWeapon = Owner.HeldItem.GetOracleWeapon();
                 heldOracleWeapon.CurSoulCapacity--;
+                Owner.GetModPlayer<OraclePlayer>().ReduceSoulOnAllWeapons(Owner.HeldItem);
                 heldOracleWeapon.SoulRecoveryCooldown = 5 * 60;
                 _soulConsumeCooldown = UseTimeAfterBuffs;
                 _totalSoulConsumed++;
@@ -296,8 +297,7 @@ namespace OracleClass {
             Projectile.direction = 1;
             if (Math.Sign(Main.MouseWorld.X - Owner.Center.X) == -1)
                 Projectile.direction = -1;
-            float rotationOffset = Projectile.direction * RotationOffset;
-            Projectile.rotation = toMouse.ToRotation() + rotationOffset;
+            Projectile.rotation = toMouse.ToRotation() - Projectile.direction * RotationOffset + MathHelper.PiOver2;
             Projectile.spriteDirection = Projectile.direction;
 
             // Set position and velocity
