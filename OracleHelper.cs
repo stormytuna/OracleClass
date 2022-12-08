@@ -1,11 +1,13 @@
 using Microsoft.Xna.Framework;
 using OracleClass.Common.Players;
+using OracleClass.Content.DamageClasses;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using Terraria.Utilities;
 
 namespace OracleClass {
     /// <summary>Using this enum instead of integers makes code a little more readable</summary>
@@ -18,6 +20,11 @@ namespace OracleClass {
     #region Oracle Helpers
 
     public static class OracleHelpers {
+        /// <summary>Returns whether or not a given item is an Oracle weapon</summary>
+        public static bool IsOracleWeapon(this Item item) {
+            return item.CountsAsClass<OracleDamageClass>();
+        }
+
         /// <summary>
         /// Returns the <c>OracleWeapon</c> instance for a given item <para />
         /// Does <b>not</b> perform null checks, use <c>TryGetOracleWeapon</c> if you need them
@@ -100,7 +107,7 @@ namespace OracleClass {
         public int BaseSoulCapacity { get; set; }
 
         /// <summary>The multiplier to base soul capacity from this weapons prefix</summary>
-        public float SoulCapacityMultiplierFromPrefix { private get; set; } = 1f;
+        public float SoulCapacityMultiplierFromPrefix { get; set; } = 1f;
 
         /// <summary>The number of frames it takes for this weapons soul to recover completely</summary>
         public int SoulRecoveryFrames { get; set; }
@@ -166,6 +173,29 @@ namespace OracleClass {
             base.UpdateInventory(player);
         }
 
+        public override bool? PrefixChance(int pre, UnifiedRandom rand) {
+            switch (pre) {
+                case -1:
+                    return !Main.rand.NextBool(4);
+            }
+
+            return base.PrefixChance(pre, rand);
+        }
+
+        public override int ChoosePrefix(UnifiedRandom rand) {
+            var modPrefixes = PrefixLoader.GetPrefixesInCategory(PrefixCategory.Custom);
+
+            List<int> rollable = new();
+            foreach (var modPrefix in modPrefixes) {
+                if (modPrefix.CanRoll(Item)) {
+                    rollable.Add(modPrefix.Type);
+                }
+            }
+            rollable.AddRange(Helpers.universalPrefixes);
+
+            return rand.NextFromList(rollable.ToArray());
+        }
+
         // This adds a "X soul capacity" tooltip under a weapons damage
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
             // Handles our soul capacity tooltip
@@ -176,16 +206,22 @@ namespace OracleClass {
             // Handles our prefix tooltip  // TODO: test this
             if (SoulCapacityMultiplierFromPrefix != 1f) {
                 var tooltip = tooltips.FindLast(tip => tip.Name.StartsWith("Prefix"));
-                int soulCapacityBonusIndex = tooltip.Name == "PrefixKnockback" ? tooltips.IndexOf(tooltip) : tooltips.IndexOf(tooltip) + 1;
-                int soulCapacityBonus = (int)MathF.Abs((1f - SoulCapacityMultiplierFromPrefix) * 100f);
-                string plusOrMinus = SoulCapacityMultiplierFromPrefix < 1f ? "-" : "+";
-                TooltipLine newLine = new(Mod, "PrefixSummonTagBonus", $"{plusOrMinus}{soulCapacityBonus}% summon tag damage");
-                newLine.IsModifier = true;
-                newLine.IsModifierBad = SoulCapacityMultiplierFromPrefix < 1f;
-                tooltips.Insert(soulCapacityBonusIndex, newLine);
+                if (tooltip is not null) {
+                    int soulCapacityBonusIndex = tooltip.Name == "PrefixKnockback" ? tooltips.IndexOf(tooltip) : tooltips.IndexOf(tooltip) + 1;
+                    int soulCapacityBonus = (int)MathF.Abs((1f - SoulCapacityMultiplierFromPrefix) * 100f);
+                    string plusOrMinus = SoulCapacityMultiplierFromPrefix < 1f ? "-" : "+";
+                    TooltipLine newLine = new(Mod, "PrefixSummonTagBonus", $"{plusOrMinus}{soulCapacityBonus}% summon tag damage");
+                    newLine.IsModifier = true;
+                    newLine.IsModifierBad = SoulCapacityMultiplierFromPrefix < 1f;
+                    tooltips.Insert(soulCapacityBonusIndex, newLine);
+                }
             }
 
             base.ModifyTooltips(tooltips);
+        }
+
+        public override void OnCreate(ItemCreationContext context) {
+            SoulCapacityMultiplierFromPrefix = 1f;
         }
 
         // Not 100% sure /when/ this applies but example instanced item does this
@@ -199,17 +235,12 @@ namespace OracleClass {
             return clone;
         }
 
-        // These save and load this weapons soul capacity multiplier from prefix
-        // We need to do this because prefixes only apply their stats once on application
         public override void SaveData(TagCompound tag) {
-            tag["soulCapacityMultiplierFromPrefix"] = SoulCapacityMultiplierFromPrefix;
-
-            base.SaveData(tag);
+            tag["SoulCapacityMultiplierFromPrefix"] = SoulCapacityMultiplierFromPrefix;
         }
-        public override void LoadData(TagCompound tag) {
-            SoulCapacityMultiplierFromPrefix = tag.GetFloat("soulCapacityMultiplierFromPrefix");
 
-            base.LoadData(tag);
+        public override void LoadData(TagCompound tag) {
+            SoulCapacityMultiplierFromPrefix = tag.GetFloat("SoulCapacityMultiplierFromPrefix");
         }
     }
 
