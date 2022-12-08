@@ -11,7 +11,7 @@ namespace OracleClass.Content {
             // Item stats
             Item.width = 18;
             Item.height = 18;
-            Item.rare = ItemRarityID.Expert;
+            Item.rare = ItemRarityID.Pink;
             Item.value = Item.sellPrice(gold: 1);
 
             // Use stats
