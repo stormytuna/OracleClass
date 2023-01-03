@@ -22,7 +22,7 @@ namespace OracleClass.Content {
             Item.noUseGraphic = true; // Important for held projectile weapons, prevents our items sprite from showing
 
             // Weapon stats
-            Item.DamageType = ModContent.GetInstance<OracleDamageClass>();
+            Item.DamageType = OracleDamageClass.Instance;
             Item.damage = 100;
             Item.knockBack = 5f;
             Item.noMelee = true;

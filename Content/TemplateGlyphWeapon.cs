@@ -1,7 +1,6 @@
 ﻿using OracleClass.Content.DamageClasses;
 using Terraria;
 using Terraria.ID;
-using Terraria.ModLoader;
 
 namespace OracleClass.Content {
     // Glyph weapons usually won't need a held projectile
@@ -19,7 +18,7 @@ namespace OracleClass.Content {
             Item.useStyle = ItemUseStyleID.Shoot;
 
             // Weapon stats
-            Item.DamageType = ModContent.GetInstance<OracleDamageClass>();
+            Item.DamageType = OracleDamageClass.Instance;
             Item.damage = 100;
             Item.knockBack = 5f;
             Item.noMelee = true;

@@ -174,6 +174,7 @@ namespace OracleClass {
         }
 
         public override bool? PrefixChance(int pre, UnifiedRandom rand) {
+            // Chance of a prefix rolling in vanilla is 1/4, this just replicates that
             switch (pre) {
                 case -1:
                     return !Main.rand.NextBool(4);
@@ -185,6 +186,8 @@ namespace OracleClass {
         public override int ChoosePrefix(UnifiedRandom rand) {
             var modPrefixes = PrefixLoader.GetPrefixesInCategory(PrefixCategory.Custom);
 
+            // Gets a list of prexifes that are rollable on this item
+            // Doing this instead of a fixed array allows other mods to add prefixes to this weapon type
             List<int> rollable = new();
             foreach (var modPrefix in modPrefixes) {
                 if (modPrefix.CanRoll(Item)) {
@@ -196,7 +199,7 @@ namespace OracleClass {
             return rand.NextFromList(rollable.ToArray());
         }
 
-        // This adds a "X soul capacity" tooltip under a weapons damage
+        // This adds an "X soul capacity" tooltip under a weapons damage
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
             // Handles our soul capacity tooltip
             int soulCapacityIndex = tooltips.FindIndex(tip => tip.Name == "Knockback") + 1;
@@ -218,10 +221,6 @@ namespace OracleClass {
             }
 
             base.ModifyTooltips(tooltips);
-        }
-
-        public override void OnCreate(ItemCreationContext context) {
-            SoulCapacityMultiplierFromPrefix = 1f;
         }
 
         // Not 100% sure /when/ this applies but example instanced item does this
@@ -277,7 +276,7 @@ namespace OracleClass {
         /// <summary>The type of this oracle weapon</summary>
         public OracleWeaponType OracleType { get; set; }
 
-        /// <summary>How much this projetile should be rotated when it points to the mouse</summary>
+        /// <summary>How much this projectile should be rotated when it points to the mouse</summary>
         public float RotationOffset { get; set; }
 
         /// <summary>This property acts as a frame counter, you can use it to apply spin-up effects</summary>
@@ -301,7 +300,7 @@ namespace OracleClass {
         public virtual void OnUseItem() { }
 
         /// <summary>Called when the projectile is killed</summary>
-        /// <param name="totalCharge">The total amount of soul this item consumed while charging</param>
+        /// <param name="totalSoulConsumed">The total amount of soul this item consumed while charging</param>
         public virtual void OnFinishedCharging(int totalSoulConsumed) { }
 
         // This is a helper property that just applies our attack speed
@@ -337,7 +336,7 @@ namespace OracleClass {
             }
 
             // Kill the projectile if we stop using it or can't use it
-            if (!Owner.channel || Owner.HeldItem.GetOracleWeapon().CurSoulCapacity <= 0) {
+            if (!Owner.channel || Owner.HeldItem.GetOracleWeapon().CurSoulCapacity <= 0 || Owner.CCed) {
                 Projectile.Kill();
             }
 
