@@ -1,25 +1,26 @@
 ﻿using OracleClass.Helpers;
 using Terraria;
 
-namespace OracleClass.Content.Prefixes {
-    public class Enigmatic : OraclePrefix {
-        public override bool CanRoll(Item item) => item.IsOracleWeapon();
+namespace OracleClass.Content.Prefixes;
 
-        public override void SetStats(ref float damageMult, ref float knockbackMult, ref float useTimeMult, ref float scaleMult, ref float shootSpeedMult, ref float manaMult, ref int critBonus) {
-            base.SetStats(ref damageMult, ref knockbackMult, ref useTimeMult, ref scaleMult, ref shootSpeedMult, ref manaMult, ref critBonus);
+public class Enigmatic : OraclePrefix
+{
+	public override bool CanRoll(Item item) => item.IsOracleWeapon();
 
-            useTimeMult = 0.9f;
-            knockbackMult = 1.10f;
-        }
+	public override void SetStats(ref float damageMult, ref float knockbackMult, ref float useTimeMult, ref float scaleMult, ref float shootSpeedMult, ref float manaMult, ref int critBonus) {
+		base.SetStats(ref damageMult, ref knockbackMult, ref useTimeMult, ref scaleMult, ref shootSpeedMult, ref manaMult, ref critBonus);
 
-        public override void ModifyValue(ref float valueMult) {
-            valueMult = 1f * (2f - 0.9f) * 1.1f * 1.05f;
-        }
+		useTimeMult = 0.9f;
+		knockbackMult = 1.10f;
+	}
 
-        public override void Apply(Item item) {
-            base.Apply(item);
+	public override void ModifyValue(ref float valueMult) {
+		valueMult = 1f * (2f - 0.9f) * 1.1f * 1.05f;
+	}
 
-            item.GetOracleWeapon().SoulCapacityMultiplierFromPrefix = 1.05f;
-        }
-    }
+	public override void Apply(Item item) {
+		base.Apply(item);
+
+		item.GetOracleWeapon().SoulCapacityMultiplierFromPrefix = 1.05f;
+	}
 }
