@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿using OracleClass.Helpers;
+using Terraria;
 
 namespace OracleClass.Content.Prefixes {
     public class Blessed : OraclePrefix {

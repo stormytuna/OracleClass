@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using OracleClass.Content.DamageClasses;
+using OracleClass.Helpers;
+using OracleClass.Helpers.Abstracts;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -30,7 +32,7 @@ namespace OracleClass.Content {
             Item.channel = true; // Also very important, without this held projectile weapons do not work
 
             // Oracle weapon stats
-            OracleType = OracleWeaponType.Cane;
+            OracleType = Enums.OracleWeaponType.Cane;
             BaseSoulCapacity = 60;
             SoulRecoveryFrames = 5 * 60;
             HandleSoulConsumption = false;

@@ -1,4 +1,6 @@
 ﻿using OracleClass.Content.DamageClasses;
+using OracleClass.Helpers;
+using OracleClass.Helpers.Abstracts;
 using Terraria;
 using Terraria.ID;
 
@@ -25,7 +27,7 @@ namespace OracleClass.Content {
             Item.shoot = ProjectileID.IceSickle;
 
             // Oracle weapon stats
-            OracleType = OracleWeaponType.Glyph;
+            OracleType = Enums.OracleWeaponType.Glyph;
             BaseSoulCapacity = 10;
             // Use either of these formats to write frame counts
             SoulRecoveryFrames = 5 * 60; // No need to comment as it's obviously 5 seconds
