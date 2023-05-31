@@ -28,7 +28,7 @@ namespace OracleClass.Common.Players {
         }
 
         // This just sets all our oracle weapons to max charge when we load in
-        public override void OnEnterWorld(Player player) {
+        public override void OnEnterWorld() {
             foreach (var item in Player.inventory) {
                 if (item.TryGetOracleWeapon(out var ow)) {
                     ow.CurSoulCapacity = ow.MaxSoulCapacity;

@@ -15,9 +15,5 @@ namespace OracleClass.Content.DamageClasses {
         }
 
         public override bool UseStandardCritCalcs => true;
-
-        public override void SetStaticDefaults() {
-            ClassName.SetDefault("oracle damage");
-        }
     }
 }

@@ -1,0 +1,38 @@
+Items: {
+	TemplateCaneWeapon: {
+		DisplayName: Template Cane Weapon
+		Tooltip: ""
+	}
+
+	TemplateFocusWeapon: {
+		DisplayName: Template Focus Weapon
+		Tooltip: ""
+	}
+
+	TemplateGlyphWeapon: {
+		DisplayName: Template Glyph Weapon
+		Tooltip: ""
+	}
+}
+
+Prefixes: {
+	Blessed.DisplayName: Blessed
+	Devoted.DisplayName: Devoted
+	Dreadful.DisplayName: Dreadful
+	Enigmatic.DisplayName: Enigmatic
+	Esoteric.DisplayName: Esoteric
+	Fabled.DisplayName: Fabled
+	Flimsy.DisplayName: Flimsy
+	Mundane.DisplayName: Mundane
+	Obsessive.DisplayName: Obsessive
+	Profane.DisplayName: Profane
+	Transcendent.DisplayName: Transcendent
+	Uncanny.DisplayName: Uncanny
+}
+
+Projectiles: {
+	TemplateCaneWeapon_HeldProj.DisplayName: Template Cane Weapon_ Held Proj
+	TemplateFocusWeapon_HeldProj.DisplayName: Template Focus Weapon_ Held Proj
+}
+
+DamageClasses.OracleDamageClass.DisplayName: oracle damage
